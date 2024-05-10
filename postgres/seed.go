@@ -23,7 +23,7 @@ func doesTableExist(tableName string) (bool, error) {
 	// check if Seasons table exists:
 	logger.Infof("Checking if %s table exists", tableName)
 	result, err := db.Query(`SELECT EXISTS (
-		SELECT FROM information_schema.tables
+		SELECT 1 FROM information_schema.tables
 		WHERE  table_schema = 'public'
 		AND    table_name   = $1
 	);`, tableName)
