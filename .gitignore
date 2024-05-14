@@ -19,3 +19,7 @@
 
 # Go workspace file
 go.work
+.env
+service-account.json
+
+__debug_bin*
