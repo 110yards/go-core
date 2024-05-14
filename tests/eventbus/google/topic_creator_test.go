@@ -10,7 +10,7 @@ import (
 func TestTopicCreator(t *testing.T) {
 	setup()
 
-	err := gpubsub.InitializeGooglePublisher(projectId)
+	err := gpubsub.InitializeGoogle(projectId)
 
 	assert.Nil(t, err)
 
