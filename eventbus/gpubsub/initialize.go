@@ -8,7 +8,6 @@ import (
 )
 
 var client *pubsub.Client
-var projectId string
 
 func InitializeGoogle(gcloudProjectId string) error {
 	c, err := pubsub.NewClient(context.Background(), gcloudProjectId)
@@ -18,7 +17,6 @@ func InitializeGoogle(gcloudProjectId string) error {
 	}
 
 	client = c
-	projectId = gcloudProjectId
 
 	return nil
 }
