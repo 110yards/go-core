@@ -33,10 +33,11 @@ func apiKeyMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		key := r.Header.Get("Authorization")
+		headerKey := r.Header.Get("Authorization")
+		queryKey := r.URL.Query().Get("key")
 
-		if key != configuredKey {
-			logger.Errorf("Invalid API key: %s", key)
+		if headerKey != configuredKey && queryKey != configuredKey {
+			logger.Errorf("Invalid API key")
 			api.Unauthorized(w)
 			return
 		}
