@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 
 	"110yards.ca/libs/go/core/eventbus"
+	"110yards.ca/libs/go/core/logger"
 	"cloud.google.com/go/pubsub"
 )
 
@@ -37,9 +38,18 @@ func (g *publisher) Publish(message interface{}) error {
 		return err
 	}
 
-	g.topic.Publish(context.Background(), &pubsub.Message{
+	r := g.topic.Publish(context.Background(), &pubsub.Message{
 		Data: data,
 	})
+
+	go func() error {
+		_, err := r.Get(context.Background())
+		if err != nil {
+			logger.Errorf("Could not publish to topic %s: %s", g.topic, err)
+		}
+		logger.Infof("Published message to topic %s", g.topic)
+		return err
+	}()
 
 	return nil
 }
