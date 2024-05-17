@@ -37,3 +37,7 @@ func BadRequest(r *http.Request, w http.ResponseWriter, content interface{}) {
 func NoContent(w http.ResponseWriter) {
 	w.WriteHeader(http.StatusNoContent)
 }
+
+func NotFound(w http.ResponseWriter) {
+	w.WriteHeader(http.StatusNotFound)
+}
