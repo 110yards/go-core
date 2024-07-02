@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 
 	"110yards.ca/libs/go/core/logger"
 )
@@ -48,6 +49,10 @@ func (v *VirtualPublisher) Publish(message interface{}) error {
 
 func NewVirtualPublisher(topicName string) Publisher {
 	virtualPushKey := fmt.Sprintf("VIRTUAL_PUSH_%s", topicName)
+
+	// replace - with _ in key and convert to upper case
+	virtualPushKey = strings.ToUpper(strings.Replace(virtualPushKey, "-", "_", -1))
+
 	pushTarget := os.Getenv(virtualPushKey)
 
 	if pushTarget == "" {
