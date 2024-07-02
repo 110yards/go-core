@@ -11,8 +11,8 @@ import (
 )
 
 type VirtualPublisher struct {
-	topicName  string
-	pushTarget string
+	topicName   string
+	pushTargets []string
 }
 
 // CreateSubscription implements Publisher.
@@ -30,9 +30,13 @@ func (v *VirtualPublisher) CreateTopic(topicName string) error {
 // Publish implements Publisher.
 func (v *VirtualPublisher) Publish(message interface{}) error {
 
-	if v.pushTarget != "" {
-		return v.PushMessage(message)
-
+	if len(v.pushTargets) > 0 {
+		for _, target := range v.pushTargets {
+			err := pushMessage(target, message)
+			if err != nil {
+				return err
+			}
+		}
 	} else {
 		j, err := json.Marshal(message)
 		if err != nil {
@@ -44,7 +48,7 @@ func (v *VirtualPublisher) Publish(message interface{}) error {
 	return nil
 }
 
-func (v *VirtualPublisher) PushMessage(message interface{}) error {
+func pushMessage(target string, message interface{}) error {
 	type PubsubMessage struct {
 		Message struct {
 			Data interface{} `json:"data"`
@@ -66,7 +70,7 @@ func (v *VirtualPublisher) PushMessage(message interface{}) error {
 		return err
 	}
 
-	request, err := http.NewRequest("POST", v.pushTarget, strings.NewReader(string(body)))
+	request, err := http.NewRequest("POST", target, strings.NewReader(string(body)))
 	if err != nil {
 		return err
 	}
@@ -81,17 +85,17 @@ func (v *VirtualPublisher) PushMessage(message interface{}) error {
 
 func NewVirtualPublisher(topicName string) Publisher {
 	virtualPushKey := fmt.Sprintf("VIRTUAL_PUSH_%s", topicName)
-
 	// replace - with _ in key and convert to upper case
 	virtualPushKey = strings.ToUpper(strings.Replace(virtualPushKey, "-", "_", -1))
 
 	pushTarget := os.Getenv(virtualPushKey)
 
-	if pushTarget == "" {
-		logger.Warnf("No virtual push target found for topic %s, configure %s to enable push in dev", topicName, virtualPushKey)
-	} else {
-		logger.Infof("Virtual push target for topic %s is %s", topicName, pushTarget)
+	// split by comma
+	if pushTarget != "" {
+		pushTargets := strings.Split(pushTarget, ",")
+		logger.Infof("Virtual push targets for topic %s are %s", topicName, pushTargets)
+		return &VirtualPublisher{topicName: topicName, pushTargets: pushTargets}
 	}
 
-	return &VirtualPublisher{topicName: topicName, pushTarget: pushTarget}
+	return &VirtualPublisher{topicName: topicName, pushTargets: []string{}}
 }
