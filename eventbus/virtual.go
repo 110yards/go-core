@@ -60,6 +60,11 @@ func (v *VirtualPublisher) PushMessage(message interface{}) error {
 
 	// use http client to POST to target
 	body, err := json.Marshal(payload)
+
+	if err != nil {
+		return err
+	}
+
 	request, err := http.NewRequest("POST", v.pushTarget, strings.NewReader(string(body)))
 	if err != nil {
 		return err
@@ -69,9 +74,8 @@ func (v *VirtualPublisher) PushMessage(message interface{}) error {
 
 	client := &http.Client{}
 	_, err = client.Do(request)
-	if err != nil {
-		return err
-	}
+
+	return err
 }
 
 func NewVirtualPublisher(topicName string) Publisher {
