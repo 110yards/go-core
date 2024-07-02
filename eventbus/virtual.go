@@ -38,7 +38,7 @@ func (v *VirtualPublisher) Publish(message interface{}) error {
 		if err != nil {
 			return err
 		}
-		logger.Infof("Published virtual message %s (no push target set)", string(j))
+		logger.Infof("Published virtual message to %s: %s (no push target set)", v.topicName, string(j))
 	}
 
 	return nil
