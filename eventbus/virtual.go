@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"110yards.ca/libs/go/core/logger"
+	"cloud.google.com/go/internal/pubsub"
 )
 
 type VirtualPublisher struct {
@@ -29,32 +30,39 @@ func (v *VirtualPublisher) CreateTopic(topicName string) error {
 
 // Publish implements Publisher.
 func (v *VirtualPublisher) Publish(message interface{}) error {
-	j, err := json.Marshal(message)
-	if err != nil {
-		return err
-	}
 
 	if v.pushTarget != "" {
-		// use http client to POST to target
-		body := strings.NewReader(string(j))
-		request, err := http.NewRequest("POST", v.pushTarget, body)
-		if err != nil {
-			return err
-		}
-
-		request.Header.Set("Content-Type", "application/json")
-
-		client := &http.Client{}
-		_, err = client.Do(request)
-		if err != nil {
-			return err
-		}
 
 	} else {
+		j, err := json.Marshal(message)
+		if err != nil {
+			return err
+		}
 		logger.Infof("Published virtual message %s (no push target set)", string(j))
 	}
 
 	return nil
+}
+
+func (v *VirtualPublisher) PushMessage(message interface{}) error {
+	payload := &pubsub.Message{
+		Data: message,
+	}
+
+	// use http client to POST to target
+	body, err := json.Marshal(payload)
+	request, err := http.NewRequest("POST", v.pushTarget, strings.NewReader(string(body)))
+	if err != nil {
+		return err
+	}
+
+	request.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	_, err = client.Do(request)
+	if err != nil {
+		return err
+	}
 }
 
 func NewVirtualPublisher(topicName string) Publisher {
