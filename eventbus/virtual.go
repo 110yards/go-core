@@ -36,10 +36,20 @@ func (v *VirtualPublisher) Publish(message interface{}) error {
 
 	if v.pushTarget != "" {
 		// use http client to POST to target
-		_, err := http.NewRequest("POST", v.pushTarget, nil)
+		body := strings.NewReader(string(j))
+		request, err := http.NewRequest("POST", v.pushTarget, body)
 		if err != nil {
 			return err
 		}
+
+		request.Header.Set("Content-Type", "application/json")
+
+		client := &http.Client{}
+		_, err = client.Do(request)
+		if err != nil {
+			return err
+		}
+
 	} else {
 		logger.Infof("Published virtual message %s (no push target set)", string(j))
 	}
