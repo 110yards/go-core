@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"110yards.ca/libs/go/core/logger"
-	"cloud.google.com/go/internal/pubsub"
 )
 
 type VirtualPublisher struct {
@@ -45,8 +44,18 @@ func (v *VirtualPublisher) Publish(message interface{}) error {
 }
 
 func (v *VirtualPublisher) PushMessage(message interface{}) error {
-	payload := &pubsub.Message{
-		Data: message,
+	type PubsubMessage struct {
+		Message struct {
+			Data interface{} `json:"data"`
+		} `json:"message"`
+	}
+
+	payload := PubsubMessage{
+		Message: struct {
+			Data interface{} `json:"data"`
+		}{
+			Data: message,
+		},
 	}
 
 	// use http client to POST to target
