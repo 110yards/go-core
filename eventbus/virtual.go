@@ -31,6 +31,7 @@ func (v *VirtualPublisher) CreateTopic(topicName string) error {
 func (v *VirtualPublisher) Publish(message interface{}) error {
 
 	if v.pushTarget != "" {
+		return v.PushMessage(message)
 
 	} else {
 		j, err := json.Marshal(message)
