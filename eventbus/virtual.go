@@ -57,6 +57,8 @@ func NewVirtualPublisher(topicName string) Publisher {
 
 	if pushTarget == "" {
 		logger.Warnf("No virtual push target found for topic %s, configure %s to enable push in dev", topicName, virtualPushKey)
+	} else {
+		logger.Infof("Virtual push target for topic %s is %s", topicName, pushTarget)
 	}
 
 	return &VirtualPublisher{topicName: topicName, pushTarget: pushTarget}
